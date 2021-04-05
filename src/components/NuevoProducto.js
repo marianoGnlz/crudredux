@@ -1,25 +1,35 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { crearNuevoProductoAction } from '../actions/productoActions';
+import { mostrarAlerta, ocultarAlertaAction } from '../actions/alertaActions'
 
-
-const NuevoProducto = ({history}) => {
+const NuevoProducto = ({ history }) => {
 
     const [nombre, setNombre] = useState('');
-    const [precio, setPrecio] = useState(0);
+    const [precio, setPrecio] = useState('');
 
     const dispatch = useDispatch();
 
     const cargando = useSelector(state => state.productos.loading);
-    const error = useSelector(({productos:{error}}) => (error));
+    const error = useSelector(({ productos: { error } }) => (error));
+    const alerta = useSelector(state => state.alerta.alerta);
+
+
     const agregarProducto = (producto) => dispatch(crearNuevoProductoAction(producto));
 
     const submitNuevoProducto = e => {
         e.preventDefault();
 
         if (nombre.trim() === '' || precio <= 0) {
+            const alerta = {
+                msg: 'Ambos campos son obligatorios',
+                classes: 'alert alert-danger text-center text-uppercase p-3'
+            }
+            dispatch(mostrarAlerta(alerta))
             return;
         }
+
+        dispatch(ocultarAlertaAction())
 
         agregarProducto({
             nombre,
@@ -36,6 +46,7 @@ const NuevoProducto = ({history}) => {
                         <h2 className="text-center mb-4 font-weight-bold">
                             Agregar Nuevo Producto
                         </h2>
+                        {alerta ? <p className={alerta.classes}>{alerta.msg}</p> : null}
                         <form
                             onSubmit={submitNuevoProducto}
                         >
@@ -58,7 +69,7 @@ const NuevoProducto = ({history}) => {
                                     placeholder="Precio Producto"
                                     name="precio"
                                     value={precio}
-                                    onChange={e => setPrecio(Number(e.target.value))}
+                                    onChange={e => setPrecio(e.target.value)}
                                 />
                             </div>
                             <button
